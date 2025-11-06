@@ -1,57 +1,49 @@
-name: Deploy to InfinityFree
+name: 🚀 Deploy Laravel App to InfinityFree
 
 on:
-  workflow_dispatch: # Allows manual trigger in GitHub Actions
   push:
     branches:
-      - main  # change if your default branch is 'master'
+      - main
 
 jobs:
   deploy:
+    name: Upload Laravel to InfinityFree
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout your repository
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: 🧩 Checkout repository
+        uses: actions/checkout@v4
 
-      # 2️⃣ Set up PHP (needed for Laravel commands)
-      - name: Set up PHP
+      - name: 📦 Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: mbstring, intl, bcmath, xml, ctype, json, tokenizer, fileinfo, pdo_mysql
-          tools: composer
 
-      # 3️⃣ Install dependencies
-      - name: Install composer dependencies
-        run: composer install --no-dev --optimize-autoloader
+      - name: ⚙️ Install Composer dependencies
+        run: |
+          composer install --no-dev --optimize-autoloader
 
-      # 4️⃣ Build assets for production
-      - name: Build assets
+      - name: 🧹 Clean up unnecessary files before deploy
+        run: |
+          rm -rf node_modules
+          rm -rf tests
+          rm -rf storage/logs/*.log
+
+      - name: 🗃️ Build front-end assets (if any)
         run: |
           npm install
-          npm run build
+          npm run build || echo "Skipping frontend build (no vite config)"
 
-      # 5️⃣ Prepare environment
-      - name: Copy .env.example to .env
-        run: cp .env.example .env
-
-      # 6️⃣ Upload to InfinityFree using FTP
-      - name: 📤 Deploy to InfinityFree via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: 📤 Upload all project files to InfinityFree
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.INFINITY_FTP_SERVER }}
           username: ${{ secrets.INFINITY_FTP_USERNAME }}
           password: ${{ secrets.INFINITY_FTP_PASSWORD }}
-          server-dir: /htdocs/  # your InfinityFree folder
-          local-dir: ./         # upload from project root
+          local-dir: ./
+          server-dir: /htdocs/
           exclude: |
             **/.git*
-            **/.github*
-            **/node_modules/**
-            **/vendor/**
-            **/storage/framework/cache/**
-            **/storage/framework/views/**
-            **/storage/logs/**
-            .env
+            **/.github/**
+            node_modules/**
+            vendor/**/.git
