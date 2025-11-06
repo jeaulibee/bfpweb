@@ -23,23 +23,25 @@ jobs:
         run: |
           composer install --no-dev --optimize-autoloader
 
-      - name: 🧹 Clean up unnecessary files before deploy
+      - name: 🧹 Clean up unnecessary files
         run: |
           rm -rf node_modules
           rm -rf tests
           rm -rf storage/logs/*.log
 
-      - name: 🗃️ Build front-end assets (if any)
+      - name: 🗃️ Build frontend assets (optional)
         run: |
           npm install
           npm run build || echo "Skipping frontend build (no vite config)"
 
-      - name: 📤 Upload all project files to InfinityFree
+      - name: 📤 Deploy to InfinityFree
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.INFINITY_FTP_SERVER }}
           username: ${{ secrets.INFINITY_FTP_USERNAME }}
           password: ${{ secrets.INFINITY_FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
           local-dir: ./
           server-dir: /htdocs/
           exclude: |
