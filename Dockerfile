@@ -11,6 +11,9 @@ RUN docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
+# Suppress Apache ServerName warning
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
 # Copy project files
 COPY . /var/www/html
 
@@ -36,5 +39,5 @@ RUN sed -i "s/80/${PORT}/g" /etc/apache2/ports.conf /etc/apache2/sites-available
 # Expose port
 EXPOSE $PORT
 
-# Start Apache and clear Laravel config/routes at runtime to fix 500 error
-CMD php artisan config:clear && php artisan route:clear && apache2-foreground
+# Run migrations (with --force for production), clear caches, and start Apache
+CMD php artisan migrate --force && php artisan config:clear && php artisan route:clear && apache2-foreground
