@@ -1,9 +1,9 @@
 # Use official PHP 8.2 image with Apache
 FROM php:8.2-apache
 
-# Install system dependencies
+# Install system dependencies including PostgreSQL dev headers
 RUN apt-get update && apt-get install -y \
-    git zip unzip libpng-dev libjpeg-dev libfreetype6-dev libonig-dev libxml2-dev
+    git zip unzip libpng-dev libjpeg-dev libfreetype6-dev libonig-dev libxml2-dev libpq-dev
 
 # Enable PHP extensions needed by Laravel
 RUN docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd
